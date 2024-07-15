@@ -15,7 +15,7 @@ jobs:
           java-version: '11'
 
       - name: Checkout to specific commit
-        run: git checkout 42f8aa6
+        run: git checkout 2fb388b0884d85de3226300ef3940968d49c9509
   
       - name: Compile Module
         run: mvn test-compile -pl jackrabbit-filevault -am
