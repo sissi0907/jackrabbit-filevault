@@ -1,0 +1,42 @@
+name: Reproduce Flaky Tests
+
+on:
+  push:
+    branches:
+      - main
+  #workflow_dispatch:
+
+jobs:
+  reproduce-flaky:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 8
+      uses: actions/setup-java@v1
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+
+    - name: Checkout to specific commit
+      run: git checkout 42f8aa6
+
+    - name: Compile Module
+      run: mvn test-compile -pl jackrabbit-filevault -am
+
+    - name: Run Flaky Test
+      run: mvn -pl jackrabbit-filevault test -Dtest=org.apache.jackrabbit.vault.packaging.integration.CrossRegistryDependenciesIT
+
+    - name: Repeat Test for Flakiness
+      run: |
+        for i in {1..100}; do
+          mvn -pl jackrabbit-filevault test -Dtest=org.apache.jackrabbit.vault.packaging.integration.CrossRegistryDependenciesIT >> test_log.txt
+        done
+
+    - name: Upload Test Log
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-log
+        path: reproduce-flaky/apache_data/fixed/test_log.txt
